@@ -25,20 +25,7 @@ trait EloquentTrait{
         return $eagerLoading ? $item->load($eagerLoading) : $item;
     }
 
-    
     // Methods for finding items
-    protected function findItemOnlyTrashed($id, $model)
-    {
-         // Use findOrFail with trashed items
-        return $model->onlyTrashed()->findOrFail($id) ?: 404;
-    }
-    
-    protected function findAllItemsOnlyTrashed($model)
-    {
-        $items = $model->onlyTrashed()->get();
-        return $items->isEmpty() ? 404 : $items;
-    }
-    
     protected function findIntroPhone($countryId)
     {
         return Country::where('id', $countryId)->value('phone_code');

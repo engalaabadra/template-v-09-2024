@@ -10,10 +10,10 @@ class EloquentRepository
 {
     use GeneralTrait;
     
-    /** Get Data (all , pagination)
+    /** Get Data (all , pagination) -> Taking into consideration lang
      * @param $model
-     * @param $eagerLoading
-     * @return array
+     * @param $eagerLoading -> relations in model such as in model profile -> user() this relation will use it in (with)
+     * @return array -> paginate if in param use word page || all if not use page in param
      */
     public function getData($model, $eagerLoading = null)
     {
@@ -37,14 +37,14 @@ class EloquentRepository
      */
     public function trash($model)
     {
-        $trashedItems = $this->findAllItemsOnlyTrashed($model);
+        $trashedItems = $model->onlyTrashed()->get(); 
         if(isEmpty($trashedItems)) return 404;
         return $trashedItems->paginate();
     }
     /** store
      * @param $request
      * @param $model
-     * @param $eagerLoading
+     * @param $eagerLoading -> relations in model such as in model comment -> post() this relation will use it in (load)
      * @return object
      */
     public function store($request, $model, $eagerLoading = null)
@@ -69,7 +69,7 @@ class EloquentRepository
     /** Show
      * @param $id
      * @param $model
-     * @param $eagerLoading
+     * @param $eagerLoading -> relations in model such as in model comment -> post() this relation will use it in (load)
      * @return object
      */
     public function show($id, $model, $eagerLoading = null)
@@ -82,7 +82,7 @@ class EloquentRepository
      * @param $request
      * @param $id
      * @param $model
-     * @param $eagerLoading
+     * @param $eagerLoading -> relations in model such as in model comment -> post() this relation will use it in (load)
      * @return object
      */
     public function update($request, $id, $model, $eagerLoading = null)
@@ -96,7 +96,7 @@ class EloquentRepository
      */
     public function restore($id, $model)
     {
-        $item = $this->findItemOnlyTrashed($id, $model);
+        $item = $model->onlyTrashed()->findOrFail($id);
         if(!$item) return 404;
         $item->restore();
         return $item;
@@ -107,7 +107,7 @@ class EloquentRepository
      */
     public function restoreAll($model)
     {
-        $items = $this->findAllItemsOnlyTrashed($model);
+        $items =  $model->onlyTrashed()->get();
         if(isEmpty($items)) return 404;
         $items->restore();
         return $items;
@@ -115,7 +115,7 @@ class EloquentRepository
     /** Destroy
      * @param $id
      * @param $model
-     * @param $eagerLoading
+     * @param $eagerLoading -> relations in model such as in model comment -> post() this relation will use it in (load)
      * @return object
      */
     public function destroy($id, $model, $eagerLoading = null)
@@ -131,13 +131,13 @@ class EloquentRepository
     /** Force Delete
      * @param $id
      * @param $model
-     * @param $eagerLoading
+     * @param $eagerLoading -> relations in model such as in model comment -> post() this relation will use it in (load)
      */
     public function forceDelete($id, $model, $eagerLoading = null)
     {
         $itemInTable = $this->find($id, $model);
         if(!$itemInTable) return 404;
-        $itemInTrash = $this->findItemOnlyTrashed($id, $model);
+        $itemInTrash = $model->onlyTrashed()->findOrFail($id);
         if(!$itemInTrash) return 404;
         $itemInTrash->forceDelete();
         if(in_array('file',$eagerLoading) && isset($itemInTrash->file)) $this->handleFileDeletion($itemInTrash);

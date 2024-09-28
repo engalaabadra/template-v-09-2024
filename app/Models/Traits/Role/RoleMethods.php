@@ -20,7 +20,7 @@ trait RoleMethods{
         }
         if($relation=='users'){
             return $role->users()->withoutGlobalScope(ActiveScope::class)->withoutGlobalScope(LanguageScope::class)->paginate(total());
-        }elseif($relation=='permissions'){
+    }elseif($relation=='permissions'){
             return $role->permissions()->withoutGlobalScope(ActiveScope::class)->withoutGlobalScope(LanguageScope::class)->paginate(total());
         }
         
