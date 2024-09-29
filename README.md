@@ -1,5 +1,4 @@
 # My Template
-# Laravel10
 
 ## How to use:
 
@@ -309,7 +308,6 @@
 ```
         * Examples in methods
             * login
-```
                 public function checkLogin($request){
                     $user = User::where('email', 'like',  $request->get('email'))
                                 ->orWhere(function($query) use ($request) {
@@ -323,7 +321,6 @@
                 }
 ```
             --- to optimize this method:
-```
                     public function checkLogin($request)
                     {
                         $user = User::with('roles:name')
@@ -344,7 +341,8 @@
 
 ### caching
 ***What is Caching in Laravel?***
-        Caching in Laravel allows you to store data temporarily to reduce the number of queries to a database or an external service. This improves the application's speed and performance by retrieving frequently accessed data from memory rather than hitting the database repeatedly.
+        
+    Caching in Laravel allows you to store data temporarily to reduce the number of queries to a database or an external service. This improves the application's speed and performance by retrieving frequently accessed data from memory rather than hitting the database repeatedly.
 
 Laravel provides several cache drivers out of the box, such as file, database, redis, memcached, and more. By default, Laravel uses the file cache driver.
 ```
