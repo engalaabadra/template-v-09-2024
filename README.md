@@ -9,6 +9,7 @@
   - php artisan passport:install
   - php artisan storage:link
   - php artisan migrate:refresh --seed
+
     OR
   - php artisan migrate:refresh
   - php artisan db:seed
