@@ -514,6 +514,7 @@ Laravel provides several cache drivers out of the box, such as file, database, r
     That enhances the capabilities of WebSocket with additional features like fallbacks, event handling, and broadcasting.
 
 ### Notification : channels -> broadcast(realtime) - database - mail - nexmo(sms) - slack
+```
 - public function via($notifiable){
         $via = ['broadcast','database','mail'];
         if($notifiable->notify_mail){
@@ -524,7 +525,7 @@ Laravel provides several cache drivers out of the box, such as file, database, r
         }
         return $via;
     }
-
+```
 #### in Broadcast 
 like event ->listen an event  when occur action will excute event (send notifications to users) 
 ** In server side
