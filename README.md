@@ -80,12 +80,8 @@
 ## General file structure :
     - app
         - Helper
-            auth.php
             constants.php
-            media.php
-            methods.php
             response.php
-            validation_messages.php
         - Http
             - Controllers
                 -API
@@ -175,13 +171,7 @@
             SendingNotificationsService.php
             VonageCheckValidateNumber.php
 
-        - Traits: 
-            AuthTrait.php
-            EloquentTrait.php
-            GeneralAttributesTrait.php
-            GeneralMethodsTrait.php
-            GeneralTrait.php
-            HandlerTrait.php
+        - GeneralClasses:
             MediaTrait.php
         for functions that use general in website
     - Modules
@@ -432,7 +422,7 @@ Laravel provides several cache drivers out of the box, such as file, database, r
            or if want determine type a queue -> dispatch(new SendingEmailJob($email,$type,$data))->onQueue('import');
            **to excute it** php artisan queue:work
 
-           Schedule Job - $schedule->job(new AssignSessionItemsJob(authUser()))->everyMinute();
+           Schedule Job - $schedule->job(new AssignSessionItemsJob(auth()->guard('api')->user()))->everyMinute();
            in method schedule in App\Console\kernel.php
            **to excute it** php artisan schedule:run Or :work -> to watch any changes
 
@@ -939,7 +929,7 @@ A way to entering values into db in a specific
 Ex. :
 public function setPasswordAttribute($value)
 {
-    $this->attributes['password'] = hashData($value);
+    $this->attributes['password'] = Hash::make($value);
 }
 ```
 ## Service Providers & Service Containers & Facade 
@@ -1042,6 +1032,12 @@ Batch : arrangement excution migrations
 ### Relation In Laravel
 ![alt text](image-1.png)
 
+#### ORM (Object-Relational Mapping)
+    way to interact with database tables using models. 
+    Eloquent ORM -> simplifies relationships between database tables, making it easier to perform operations , manage and query data more effectively
+    like :retrieving related data, updating, or inserting data across multiple tables.
+    Eloquent ORM -> supports various types of relationships
+
 ### One-to-One Relationship
  relationship is where a single record in one table is associated with a single record in another table.
 ***Example*** 
@@ -1128,7 +1124,20 @@ class Role extends Model
 $roles = User::find(1)->roles; // Fetch all roles for user ID 1
 $users = Role::find(1)->users; // Fetch all users with role ID 1
 ```
+### Has-One-Through Relationship
+is a one-to-one relationship through an intermediate table.
+***Example***
+A country has one capital city, but the capital is stored in a state table.
+```
+class Country extends Model{
+    public function capital()
+    {
+        return $this->hasOneThrough(City::class, State::class);
+    }  
+}
 
+
+```
 #### Has Many Through (Indirect Relationships)
 relationship defines a relationship that is indirectly linked via another intermediate model.
 
@@ -1235,6 +1244,338 @@ $tags = Post::find(1)->tags; // Fetch all tags for post ID 1
 $tags = Video::find(1)->tags; // Fetch all tags for video ID 1
 ```
 --- Like Model File -> relation with all models (fileable_id , dileable_type->name of model)
+### Main Differences
+#### Normal Class & Abstract Class , Private Method & Public Method
+    Summery : if exist methods calling another inside methods (will be these is private) -> the best , move these private methods into another class -> service & make it public in another class service & use it in the main class as depedency injection ( create an object from this class service to use these methods from it here)
+##### Normal Class & Abstract Class :
+     dont need make a class is abstract without need to another classes extends from it .
+     class abstract useful when the moved logic serves as a common base for other classes .
+
+- abstract class if need to extend the functionality across multiple child classes, need into many methods in this class , the best the way -> make this class be abstract and make another classes extends from it .
+- normal class : if the methods need to be used directly .
+    Service Class : if the methods perfom tasks like services 
+
+##### Private Method & Public Method : move private method into another class 
+    Summery : if they are reusable, logical, or if your class is handling too much responsibility.
+- (reusable) if other parts in app. need into  this method -> move into another class to easy using it in other parts .
+**** This helps in applying the principle of DRY (Don’t Repeat Yourself) : if other parts need into this method can use it easy without reapt it again .
+- (many responsibilities) if class is becoming too large & many responsibilities -> move into another class to easy using it in other parts .
+**** This helps in applying the principle of Single Responsibility Principle (SRP)
+- (logical) if logic this method diff. about another methods in this class -> move into another class to easy using it in other parts .
+**** This helps : code more modular and testable .
+And After move this private method in another class will be public method in another class ,  because it out from this class to see it (private method only in same class)
+
+#### Dont move private meth. into another class
+when need & interact with many properties in this class
+
+##### Examples : 
+```
+class OrderController extends Controller
+{
+    public function createOrder(Request $request)
+    {
+        // Code to create order
+        $this->calculateDiscount($order);
+    }
+
+    private function calculateDiscount($order)
+    {
+        // Logic to calculate discount
+    }
+}
+```
+```
+class DiscountService
+{
+    public function calculateDiscount($order)
+    {
+        // Logic to calculate discount
+    }
+}
+```
+```
+use App\Services\DiscountService;
+
+class OrderController extends Controller
+{
+    protected $discountService;
+
+    public function __construct(DiscountService $discountService)
+    {
+        $this->discountService = $discountService;
+    }
+
+    public function createOrder(Request $request)
+    {
+        // Code to create order
+        $this->discountService->calculateDiscount($order);
+    }
+}
+```
+
+#### Diff. Trait , Class
+- Trait : 
+    - reuse across several classes without using inheritance , share logic between classes . (share reusable methods across multiple, unrelated classes.) & these method in trait class dont relate with a class will use these method .
+- Class : 
+    - The methods involve complex logic or need to manage external dependencies (such as services, repositories, or APIs) .
+    - More Complex Logic
+***Example***
+```
+use App\Services\NotificationService;
+
+class OrderController extends Controller
+{
+    protected $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
+    public function completeOrder()
+    {
+        $this->notificationService->sendEmail($user->email, 'Your order is completed!');
+    }
+}
+```
+```
+namespace App\Services;
+
+class NotificationService
+{
+    public function sendEmail($recipient, $message)
+    {
+        // Logic to send an email
+        \Mail::to($recipient)->send(new \App\Mail\GenericMail($message));
+    }
+}
+```
+### Diff Trait , Service class
+- Service Class : 
+ when want use dependency injection -> more quality more than trait
+ when complex logic
+- Trait :
+ when less complexlity
+
+### separate relations in model & methods & scopes & attributes in another files Or in same class Model
+#### Keeping Everything in the Model File
+- Simplicity 
+- Convenience : model is not too large or complex .
+#### move into another class
+- in Large Models
+- Single Responsibility Principle (SRP)
+- Reusability
+- Improved Testing
+
+```
+trait HasProfileTrait
+{
+    public function profile()
+    {
+        return $this->hasOne(Profile::class);
+    }
+}
+```
+```
+class User extends Authenticatable
+{
+    use HasProfileTrait, UserScopesTrait;
+}
+```
+### MethodsTrait
+use this in a model & when i need to use these methods will use this file OR make DI for this model and from this model will extract these methods
+```
+    /**
+     * @var Banner
+     */
+    protected $banner;
+    
+
+    /**
+     *  constructor.
+     *
+     * @param Banner $banners
+     */
+    public function __construct( banner $banner)
+    {
+        $this->banner = $banner;
+    }
+
+```
+```
+    $this->banner->getData();
+    OR
+    use BannerMethodsTrait
+```
+#### Helper fun.
+ can speed up development for simple tasks , but complex tasks(complex logic) often better to use service classes or repositories  , To  ensuring a more maintainable and testable codebase
+***Example***
+```
+if (! function_exists('formatCurrency')) {
+    function formatCurrency($amount)
+    {
+        return '$' . number_format($amount, 2);
+    }
+}
+```
+### Method action  ->contain on update & store OR seperate this method into 2 meth. 1. store , 2. update
+- Single Responsibility Principle (SRP): to handling too  many tasks: updating user info, handling profile creation/updating, formatting birth dates, and dealing with file uploads. Separating these responsibilities allows each function to focus on a single concern,
+- Maintainance : making the code easier to maintain.
+- Readability : easier to read and understand.
+- Reusability: reuse these methods elsewhere in project.
+- Testing : easier to test.
+- Flexibility: more easily change the logic.
+
+### Seperation method into smaller methods
+-  improves quality & performance & makes more modular & easier to test & enhances maintainability. This approach adheres to SRP and simplifies future modifications.
+
+### Method in a specific model
+```
+    $user->hasRole('user')
+```
+```
+class User extends Model{
+    public function hasRole($roleName)
+    {
+        return $this->roles->contains('name', $roleName);
+    }
+}
+```
+Pros :
+- Reusability: The hasRole method can now be reused anywhere in your application.
+- Readability: Your destroy method is cleaner and easier to understand.
+- Maintainability: If the role-checking logic changes, you only need to update it in one place.
+
+Cons:
+- Overhead: If this check is only ever used once, refactoring may seem unnecessary.
+### use Interface for every repo. class
+- Loose Coupling and Flexibility:
+easier to switch to a different repository .
+- Easier Unit Testing:
+it simpler to test your services or controllers without worrying about database interactions.
+- Enforcing Contracts:
+This ensures that any implementation of the repository will have consistent behavior and methods.
+- Scalability:
+to work on various implementations simultaneously, knowing that each implementation will fulfill the same contract.
+- Consistency:
+When using multiple repositories in your application, having interfaces for them promotes a consistent approach to how data is accessed or manipulated.
+
+#### Composer (manage libraries, ensure compatibility, and keep your project organized and up-to-date)
+    is a dependency management tool for managing libraries, frameworks, and packages that a project requires. 
+    It allows developers to specify the libraries their project depends on and installs them for easy use and updates. 
+    is widely used in Laravel projects, as it simplifies the installation and management of various Laravel packages and other third-party libraries.
+### Example Commands
+- Install Dependencies: composer install
+- Add a New Package: composer require vendor/package
+- Update Dependencies: composer update
+- Dump Autoload: composer dump-autoload (regenerates the autoloader files)
+
+
+### Upgrade laravel 10 into laravel 11
+1. in file structure :
+ remove this file kernel  & put any thing in this file kernel will put in bootstrap/app.php
+ ```
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        function (Router $router) {
+            // Web routes
+            $router->middleware('web')
+                ->group(__DIR__.'/../routes/web.php');
+
+            // API routes
+            $router->middleware('api')
+                ->prefix('api')
+                ->name('api.')
+                ->group(__DIR__.'/../routes/api.php');
+
+            // Admin routes
+            $router->middleware('api') // Use appropriate middleware, e.g., 'auth:api'
+                ->prefix('api/admin')
+                ->name('api.admin.')
+                ->group(__DIR__.'/../routes/admin.php');
+        },
+        commands: __DIR__.'/../routes/console.php',
+        channels: __DIR__.'/../routes/channels.php',
+        health: '/up'
+    )
+    ->withMiddleware(function (Middleware $middleware) {
+            // Global middleware
+            $middleware->trustProxies();
+            // $middleware->handleCors();
+            $middleware->preventRequestsDuringMaintenance();
+            // $middleware->validatePostSize();
+            $middleware->trimStrings();
+            $middleware->convertEmptyStringsToNull();
+            // $middleware->exceptionHandling();
+
+            // Web middleware group
+            $middleware->web(append: [
+                \App\Http\Middleware\EncryptCookies::class,
+                \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+                \Illuminate\Session\Middleware\StartSession::class,
+                \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+                \App\Http\Middleware\VerifyCsrfToken::class,
+                \Illuminate\Routing\Middleware\SubstituteBindings::class,
+                \App\Http\Middleware\Localization::class,
+            ]);
+
+            // API middleware group
+            $middleware->api(append: [
+                \Laravel\Passport\Http\Middleware\CreateFreshApiToken::class,
+                \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+                \Illuminate\Session\Middleware\StartSession::class,
+                'throttle:api',
+                \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            ]);        
+        
+    })
+    ->withExceptions(function (Exceptions $exceptions) {
+        $exceptions->dontReport(MissedFlightException::class);
+ 
+        $exceptions->report(function (InvalidOrderException $e) {
+            // ...
+        });
+    })->create();
+ ```
+ 2. in composer.json :
+ ```
+ "require": {
+    "laravel/framework": "^11.0",
+    // other dependencies
+}
+```
+```
+composer update
+```
+3. Updated package versions
+4. updating controller file
+```
+<?php
+
+namespace App\Http\Controllers;
+
+abstract class Controller
+{
+    //
+}
+```
+5. Update Configuration Files (files in folder config) -> such as config/app.php, config/auth.php, config/database.php, etc
+```
+php artisan vendor:publish
+```
+7. run test command
+```
+php artisan test
+```
+6. Clear caches commands
+```
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+```
+
+
 ## Programmer:
 
 - Eng-Alaa Badra (Laravel Developer).
