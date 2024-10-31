@@ -1247,14 +1247,14 @@ $tags = Video::find(1)->tags; // Fetch all tags for video ID 1
 --- Like Model File -> relation with all models (fileable_id , dileable_type->name of model)
 ### Main Differences
 #### Normal Class & Abstract Class , Private Method & Public Method
-    Summery : if exist methods calling another inside methods (will be these is private) -> the best , move these private methods into another class -> service & make it public in another class service & use it in the main class as depedency injection ( create an object from this class service to use these methods from it here)
+    Summery : if exist methods calling another inside methods (will be these is private) -> the best , move these private methods into another class (contains internal methods)-> service & make it public in another class service & use it in the main class as depedency injection ( create an object from this class service to use these methods from it here)
 ##### Normal Class & Abstract Class :
      dont need make a class is abstract without need to another classes extends from it .
      class abstract useful when the moved logic serves as a common base for other classes .
 
 - abstract class if need to extend the functionality across multiple child classes, need into many methods in this class , the best the way -> make this class be abstract and make another classes extends from it .
-- normal class : if the methods need to be used directly .
-    Service Class : if the methods perfom tasks like services 
+- normal class : if the methods need to be used directly . if methods that inside it , dont need to extends from this class to use  these method from it -> use these by using DI not extends class 
+    Service Class : if the methods perfom tasks like services & when i need use these methods will DI not extends
 
 ##### Private Method & Public Method : move private method into another class 
     Summery : if they are reusable, logical, or if your class is handling too much responsibility.
@@ -1315,6 +1315,8 @@ class OrderController extends Controller
 ```
 
 #### Diff. Trait , Class
+    Trait -> reusable , less complex 
+    Class -> not reusable , more complex
 - Trait : 
     - reuse across several classes without using inheritance , share logic between classes . (share reusable methods across multiple, unrelated classes.) & these method in trait class dont relate with a class will use these method .
 - Class : 
@@ -1383,7 +1385,8 @@ class User extends Authenticatable
     use HasProfileTrait, UserScopesTrait;
 }
 ```
-### MethodsTrait
+### MethodsTrait for model 
+    relate directly with model , so should be use  model and use it in any where by using this model .
 use this in a model & when i need to use these methods will use this file OR make DI for this model and from this model will extract these methods
 ```
     /**
@@ -1428,7 +1431,7 @@ if (! function_exists('formatCurrency')) {
 - Flexibility: more easily change the logic.
 
 ### Seperation method into smaller methods
--  improves quality & performance & makes more modular & easier to test & enhances maintainability. This approach adheres to SRP and simplifies future modifications.
+-  improves quality & performance & makes more modular(modifing, maintainacne) & easier to test & enhances maintainability. This approach adheres to SRP and simplifies future modifications.
 
 ### Method in a specific model
 ```
@@ -1460,8 +1463,21 @@ This ensures that any implementation of the repository will have consistent beha
 to work on various implementations simultaneously, knowing that each implementation will fulfill the same contract.
 - Consistency:
 When using multiple repositories in your application, having interfaces for them promotes a consistent approach to how data is accessed or manipulated.
+### Summery 
+#### Class & Abstract , Public method & Private meth , Trait & Class(service) , separate relations & methods in model in another classes trait, MethodsTrait for model , helper , action meth , Seperation method into smaller methods, interface for evey repo. 
+    - Class & Abstract : if class dont need another classes extends from it ->  Normal Class , if need -> Abstract Calss
+    - Public & Private meth : this private method original internal meth in another meth , which is this meth call internal meth that it private in same class , but if move into another class will be public &&&& move private meth in another class -> if dont depend on any thing in this class (reusable , SRP , logical)
+    - Trait & Class(service) : Trait -> when need to reusable , less complex & Class -> when need not reusable , more complex (services, repositories, APIs)
+    - Separate relations & methods in model in another classes trait -> SRP, Reusability , Improved Testing , in Large Models 
+    WHEN keep its -> Simplicity , in small models
+    - MethodsTrait for model : use it in a model , because relate directly with model & when use it by use this model
+    - Helper fun. : speed for simple tasks not complex tasks
+    - action meth : seprate update , store meth -> SRP , Maintainance , Readability , Reusability , Testing , Flexibility
+    - Seperation method into smaller methods -> SRP , Maintainance , Readability , Reusability , Testing , Flexibility
+    - interface for evey repo. : Flexibility( esay switch between repos.) & easier testing & Scalability (various implementations simultaneously) & Consistency(when exist many repos.)
 
 #### Composer (manage libraries, ensure compatibility, and keep your project organized and up-to-date)
+
     is a dependency management tool for managing libraries, frameworks, and packages that a project requires. 
     It allows developers to specify the libraries their project depends on and installs them for easy use and updates. 
     is widely used in Laravel projects, as it simplifies the installation and management of various Laravel packages and other third-party libraries.
