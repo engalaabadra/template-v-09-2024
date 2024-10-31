@@ -1476,7 +1476,7 @@ When using multiple repositories in your application, having interfaces for them
     - Seperation method into smaller methods -> SRP , Maintainance , Readability , Reusability , Testing , Flexibility
     - interface for evey repo. : Flexibility( esay switch between repos.) & easier testing & Scalability (various implementations simultaneously) & Consistency(when exist many repos.)
 
-#### Composer (manage libraries, ensure compatibility, and keep your project organized and up-to-date)
+#### Composer (manage libraries,packages , ensure compatibility, and keep  project organized and up-to-date)
 
     is a dependency management tool for managing libraries, frameworks, and packages that a project requires. 
     It allows developers to specify the libraries their project depends on and installs them for easy use and updates. 
@@ -1490,7 +1490,7 @@ When using multiple repositories in your application, having interfaces for them
 
 ### Upgrade laravel 10 into laravel 11
 1. in file structure :
- remove this file kernel  & put any thing in this file kernel will put in bootstrap/app.php
+ remove routes & middlewares for file kernel  & put any thing in this file kernel will put in bootstrap/app.php
  ```
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
