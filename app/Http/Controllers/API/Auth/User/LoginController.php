@@ -2,28 +2,27 @@
 
 namespace App\Http\Controllers\API\Auth\User;
 
-use App\Exceptions\CustomException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Repositories\Auth\Login\User\LoginRepository;
 use Illuminate\Http\Request;
 use App\Models\User;
-use Modules\Profile\Resources\ProfileResource;
+use App\Repositories\Auth\Login\User\LoginRepository;
+use App\Resources\ProfileResource;
 
 class LoginController extends Controller
 {
     /**
-     * @var LoginRepository
-     */
-    protected $loginRepo;
-    /**
      * @var User
     */
     protected $user;
+    /**
+     * @var LoginRepository
+    */
+    protected $loginRepo;
 
-    public function __construct(LoginRepository $loginRepo,User $user){
-        $this->loginRepo = $loginRepo;
+    public function __construct(User $user , LoginRepository $loginRepo){
         $this->user = $user;
+        $this->loginRepo = $loginRepo;
     }
 
     /**
@@ -33,20 +32,15 @@ class LoginController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      */
     public function login(LoginRequest $request){
-        try{
-
-            $login=  $this->loginRepo->login($request,$this->user);
-            $errorResponse = isDataMissing($login);
-            if ($errorResponse) return $errorResponse; // Return the error message if data is missing
-            $data=[
-                    "token"=>createToken($login),
-                    "user" => new ProfileResource($login),
-                ];
-                return successResponse(0, $data,trans('auth.Logged in successfully'));
-            }catch(CustomException $r){
-            throw new CustomException('Something went wrong!', 422);
-
-        }
+        $user = $this->loginRepo->login($request);
+        if(is_string($user)) return clientError(0,$user);// Return the error message if data is missing
+        $roles= $user->roles->pluck('name')->toArray();
+        if(!in_array('user',$roles)) return trans('messages.Invalid credentials');
+        $data=[
+            "token"=>$user->createToken('token')->accessToken,
+            "user" => new ProfileResource($user),
+        ];
+        return successResponse(0, $data,trans('auth.Logged in successfully'));
     }
 
     /**
@@ -57,10 +51,9 @@ class LoginController extends Controller
      */
    public function destroy(Request $request)
     {
-        $logout=  $this->loginRepo->logout($request);
-        $errorResponse = isDataMissing($logout);
-        if ($errorResponse) return $errorResponse; // Return the error message if data is missing
-        return $logout ? successResponse(4) : serverError(0);
+        if(!hasRole('user')) return clientError(0,trans('messages.Invalid credentials'));// Return the error message if data is missing
+        $request->user()->token()->revoke();
+        return successResponse(4);
     }
 }
 

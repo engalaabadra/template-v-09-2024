@@ -5,11 +5,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Role;
 use Barryvdh\Debugbar\Facades\Debugbar;
-use GeneralTrait;
+ 
 
 class HomeController extends Controller
 {
-    use GeneralTrait;
+     
     
     /**
      * HomeController constructor.

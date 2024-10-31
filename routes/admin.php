@@ -2,9 +2,10 @@
 use App\Http\Controllers\API\Auth\Admin\LoginController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('admin')->group(function(){
-    Route::post('login', [LoginController::class, 'login'])->name('login');
-    Route::middleware(['auth:api'])->group(function(){
-        Route::delete('/logout', [LoginController::class, 'destroy']);
-    });
+//login
+Route::post('login', [LoginController::class, 'login'])->name('login');
+
+//logout
+Route::middleware(['auth:api'])->group(function(){
+    Route::delete('/logout', [LoginController::class, 'destroy']);
 });

@@ -3,25 +3,16 @@
 namespace App\Models;
 
 use App\Models\Admin;
-use GeneralTrait;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Laratrust\Models\LaratrustRole;
-use App\Models\Traits\Role\GeneralRoleTrait;
+use Laratrust\Models\Role as RoleModel;
+use App\Traits\Role\RoleRelationsTrait;
+use App\Models\BaseModel;
+use App\GeneralClasses\GeneralAttributesClass;
 
-class Role extends LaratrustRole
+class Role extends RoleModel
 {
-    use SoftDeletes,GeneralTrait,GeneralRoleTrait;
-    protected $appends = ['original_active'];
+    use GeneralAttributesClass, RoleRelationsTrait, SoftDeletes;
     public $guarded = [];
 
-    public function users(){
-        return $this->belongsToMany(User::class,'role_user','role_id','user_id');
-    }
-    public function permissions(){
-        return $this->belongsToMany(Permission::class,'permission_role','role_id','permission_id');
-    }
-
-    public function admins(){
-        return $this->belongsToMany(Admin::class,'role_user','role_id','user_id');
-    }
+   
 }

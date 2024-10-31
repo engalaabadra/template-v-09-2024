@@ -9,7 +9,7 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Modules\Chat\Entities\Chat;
+use App\Models\Chat;
 
 class MessageCreated  implements ShouldBroadcast
 {
@@ -22,7 +22,7 @@ class MessageCreated  implements ShouldBroadcast
     /**
      * Create a new event instance
      * 
-     * @param \Modules\Chat\Entities\Chat $message
+     * @param \App\Models\Chat $message
      * 
      * @return void
      */

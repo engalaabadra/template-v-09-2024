@@ -2,23 +2,25 @@
 
 namespace App\Models;
 
-use App\Traits\GeneralTrait;
+ 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Passport\HasApiTokens;
-use Laratrust\Traits\LaratrustUserTrait;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Passport\HasApiTokens;
 use App\Models\Role;
 use App\Models\Permission;
-use  App\Models\Traits\User\GeneralUserTrait;
-use Modules\Geocode\Entities\Country;
+use App\Models\Geocode\Country;
+use App\Traits\User\UserRelationsTrait;
+use Laratrust\Traits\HasRolesAndPermissions;
+use Laratrust\Contracts\LaratrustUser;
+use App\Models\BaseModel;
+use App\GeneralClasses\GeneralAttributesClass;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements LaratrustUser
 {
-    use GeneralTrait,GeneralUserTrait,LaratrustUserTrait , HasApiTokens, HasFactory, Notifiable,SoftDeletes;
-    protected $appends = ['original_active'];
+    use GeneralAttributesClass, UserRelationsTrait , HasApiTokens, HasRolesAndPermissions,  HasFactory, Notifiable,SoftDeletes;
     public $fillable = [
         'fcm_token',
         'full_name',
@@ -29,7 +31,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'email_verified_at',
         'phone_verified_at',
-        'active',
     ];
 
     public $eagerLoading = ['file'];
@@ -48,34 +49,18 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @var array<string, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
-    //mutators
+    
     /**
-     * Always encrypt the password when it is updated.
+     * Get the attributes that should be cast.
      *
-     * @param $value
-    * @return string
-    */
-    public function setPasswordAttribute($value)
+     * @return array<string, string>
+     */
+    protected function casts(): array
     {
-        $this->attributes['password'] = hashData($value);
+        return [
+            'email_verified_at' => 'datetime'
+        ];
     }
-    //basic relations
-    
-    public function roles(){
-        return $this->belongsToMany(Role::class,'role_user','user_id','role_id');
-    }
-    public function permissions(){
-        return $this->belongsToMany(Permission::class,'permission_user','user_id','permission_id');
-    }
-    public function country(){
-        return $this->belongsTo(Country::class,'country_id');
-    }
-
-    
-
 
 
 }

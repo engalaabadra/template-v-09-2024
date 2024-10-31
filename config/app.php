@@ -186,7 +186,7 @@ return [
         /*
          * Package Service Providers...
          */
-        Laratrust\LaratrustServiceProvider::class,
+        // Laratrust\LaratrustServiceProvider::class,
         /*
          * Application Service Providers...
          */
@@ -218,15 +218,14 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         'Laratrust'   => Laratrust\LaratrustFacade::class,
         //custom for traits for app
-        'GeneralTrait' => App\Traits\GeneralTrait::class,
         'PDF' => Mccarlosen\LaravelMpdf\Facades\LaravelMpdf::class,
         //custom for services for app
-        'SendingNotificationsService' => App\Services\SendingNotificationsService::class,
-        'SendingMessagesService' => App\Services\SendingMessagesService::class,
-        'ProccessCodesService' => App\Services\ProccessCodesService::class,
-        'PaymentMethodService' => App\Services\PaymentMethodService::class,
-        'PaymentMethodService' => App\Services\PaymentMethodService::class,
-        'GeneratePdfService' => App\Services\GeneratePdfService::class,
+        'SendingNotificationsService' => App\Services\General\SendingNotificationsService::class,
+        'SendingMessagesService' => App\Services\General\SendingMessagesService::class,
+        'ProccessCodesService' => App\Services\General\ProccessCodesService::class,
+        'PaymentMethodService' => App\Services\General\PaymentMethodService::class,
+        'PaymentMethodService' => App\Services\General\PaymentMethodService::class,
+        'GeneratePdfService' => App\Services\General\GeneratePdfService::class,
         
 
     ])->toArray(),

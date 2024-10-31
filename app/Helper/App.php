@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Modules\Geocode\Entities\Country;
+use App\Models\Geocode\Country;
 
 function isNestedArray($array): bool
 {

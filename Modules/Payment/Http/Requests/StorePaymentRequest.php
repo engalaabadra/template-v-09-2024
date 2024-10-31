@@ -3,13 +3,13 @@
 namespace Modules\Payment\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use GeneralTrait;
+ 
 use Illuminate\Validation\Rule;
 
 
 class StorePaymentRequest extends FormRequest
 {
-    use GeneralTrait;
+     
 
     /**
      * Determine if the Payment is authorized to make this request.

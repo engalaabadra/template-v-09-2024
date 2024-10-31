@@ -16,9 +16,10 @@ class Thawani
     protected $paymentMethod;
     protected $options;
     protected $client;
-    public function __construct(PaymentMethod $paymentMethod , $options)
+    public function __construct(PaymentMethod $paymentMethod, PaymentService $paymentService  , $options)
     {
         $this->paymentMethod = $paymentMethod;
+        $this->paymentService = $paymentService;
         $this->options = $options;
     }
     
@@ -41,7 +42,7 @@ class Thawani
 
    public function verify() : Payment
    {
-        $resultPayment = $this->getPayment();
+        $resultPayment = $this->paymentService->getPayment();
         try{
             $transaction_id = Session::get('transaction_id');
             $response = $this->client->getCheckoutSession($transaction_id);

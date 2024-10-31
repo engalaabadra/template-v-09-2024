@@ -1,14 +1,23 @@
 <?php
 namespace App\Repositories\Auth\Recovery\Password;
 
-use App\Services\MsegatSmsService;
-use App\Services\ProccessCodesService;
-use App\Traits\GeneralTrait;
+use App\Services\General\MsegatSmsService;
+use App\Services\General\ProccessCodesService;
+ 
 use App\Models\User;
-use App\Services\SendingMessagesService;
+use App\Services\General\SendingMessagesService;
+use App\Services\Auth\Password\PasswordRecoveryService;
 
 class PasswordRepository  implements PasswordRepositoryInterface{
-    use GeneralTrait;
+     
+    /**
+     * @var PasswordRecoveryService
+     */
+    protected $passwordRecoveryService;
+    public function __construct(PasswordRecoveryService $passwordRecoveryService){
+        $this->passwordRecoveryService = $passwordRecoveryService;
+
+    }
     /**
     * Forgot Password .
     * @param ForgotPasswordRequest $request
@@ -17,26 +26,20 @@ class PasswordRepository  implements PasswordRepositoryInterface{
     * @return object
     */
     public function forgotPassword($request,$model){//model: password_resets , model1: user
-        $code = getCode();
-        $result =  $request->processForgotPassword($request,$code,$model);
-        session(['info_user'=>(object)$result]);
-        return $result;
+        $data=$request->validated();
+        $data['code'] = getCode();
+        if ($request->has('phone_no')) {
+            $msg ="رمز تغيير كلمة المرور:" . $data['code']." يرجى استخدامه فورًا.";
+            $result = app(ProccessCodesService::class)->processPhone($model,$request,$data['code'],$msg);
+            if(is_string($result)) return $result;
+        } if ($request->has('email')) {
+            $result = app(ProccessCodesService::class)->processEmail($model,$request,$data['code']);
+            if(is_string($result)) return $result;
+        }
+        session(['info_user'=>(object)$data]);
+        return $data;
     }
-    /**
-    * Check Code .
-    * @param CheckCodeRequest $request
-    * @param User $model
-    * @return object
-    */
-    public function checkCode($request,$model){
-        $data= $request->validated();
-        $objectCode= app(ProccessCodesService::class)->checkCode($model,$data['code']);
-        if(is_string($objectCode)) return  $objectCode;
-        $infoUser = session('info_user');
-        $data = $request->prepareMessageData($model, $infoUser);
-        // app(SendingMessagesService::class)->sendingMessage($data);
-        return $objectCode;
-    }
+
     /** Resend Code
     * @param PasswordReset $model
     * @return object
@@ -48,7 +51,7 @@ class PasswordRepository  implements PasswordRepositoryInterface{
         // Generate a new password reset code
         $code = getCode();
         // Process based on available phone number or email
-        $result = $this->processContactMethod($model, $infoUser, $code);
+        $result = $this->passwordRecoveryService->processContactMethod($model, $infoUser, $code);
         if(is_string($result)) return $result;
         $infoUser->code = $code;
         return [
@@ -57,32 +60,19 @@ class PasswordRepository  implements PasswordRepositoryInterface{
             'code'=>$infoUser->code
         ];
     }
-    /** Process Contact Method 
-    * Resend Code .
-    * @param PasswordReset $model
-    */
-    private function processContactMethod($model, $infoUser, $code)
-    {
-        // Process phone number if it exists
-        if (isset($infoUser->phone_no)) {
-            $msg = "رمز تغيير كلمة المرور: " . $code . " يرجى استخدامه فورًا.";
-            return app(ProccessCodesService::class)->processPhone($model, $infoUser, $code, $msg);
-        }
-        // Process email if it exists
-        if (isset($infoUser->email)) {
-            return app(ProccessCodesService::class)->processEmail($model, $infoUser, $code);
-        }
-        return trans('messages.No valid contact information found.');
-    }
+
     
     public function resetPassword($request)
     {
         $data = $request->validated();
         // Fetch the user based on email or phone number
-        $resultUser = $request->findUserByContact($request);
+        // Check if the email is provided and find the user by email
+        if (isset($request->email))  $resultUser = User::where('email', 'like', $request->email)->first();
+        // Check if phone is provided and find the user by phone
+        elseif(isset($request->phone_no)) $resultUser = User::where(['phone_no'=> $request->phone_no , 'country_id'=> $request->country_id])->first();
         if (!$resultUser)  return trans('messages.User not found');
         $resultUser->update(['password'=>$data['password']]);
-        return $resultUser->toArray();
+        return $resultUser;
     }
 
 }

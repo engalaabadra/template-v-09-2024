@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('payment_methods', function (Blueprint $table) {
             $table->id();
-            $table->string('main_lang')->default(localLang());
+            $table->string('main_lang')->default(config('app.locale'));
             $table->foreignId('translate_id')->nullable()->constrained('payment_methods', 'id')->cascadeOnUpdate()->cascadeOnDelete();
             $table->string('name');
             $table->string('slug')->unique();

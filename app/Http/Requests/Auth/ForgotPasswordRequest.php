@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Auth;
 
-use App\Services\MsegatSmsService;
-use App\Services\ProccessCodesService;
-use App\Traits\GeneralTrait;
+use App\Services\General\MsegatSmsService;
+use App\Services\General\ProccessCodesService;
+ 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -15,7 +15,7 @@ use App\Models\User;
  */
 class ForgotPasswordRequest extends FormRequest
 {
-    use GeneralTrait;
+     
 
     /**
      * Determine if the user is authorized to make this request.
@@ -36,31 +36,19 @@ class ForgotPasswordRequest extends FormRequest
     {
         return [
             'email' => 'required_without:phone_no|email|exists:users,email',
-            'country_id' => 'required_with:phone_no|numeric|exists:countries,id',
+            'country_id' => [
+                'required_with:phone_no', 
+                'numeric',
+                // Custom validation to check if the country_id belongs to the phone_no
+                Rule::exists('users', 'country_id')->where(function ($query) {
+                    $query->where('phone_no', request('phone_no'));
+                }),
+            ],
             'phone_no' => 'required_without:email|numeric|regex:/^\d+$/|digits_between:7,14|exists:users,phone_no',
             
         ];
     }
-    /**
-     * Process Forgot Password.
-     *
-     * @return array
-     */
-    public function processForgotPassword($request,$code,$model){//model :reset_passd
-        $data=$request->validated();
-        $data['code'] = getCode();
-        if ($request->has('phone_no')) {
-            $msg ="رمز تغيير كلمة المرور:" . $data['code']." يرجى استخدامه فورًا.";
-            $result = app(ProccessCodesService::class)->processPhone($model,$request,$data['code'],$msg);
-            if(is_string($result)) return $result;
-        } if ($request->has('email')) {
-            $result = app(ProccessCodesService::class)->processEmail($model,$request,$data['code']);
-            if(is_string($result)) return $result;
-        }
-        return $data;
-
-    }
-
+    
 
     /**
      * @return array

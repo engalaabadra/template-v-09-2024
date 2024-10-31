@@ -6,14 +6,14 @@ use Illuminate\Http\Request;
 use Modules\Banner\Http\Controllers\API\BannerResourceController;
 use App\Http\Controllers\API\User\DoctorController;
 use Modules\Specialty\Http\Controllers\API\User\SpecialtyController;
-use GeneralTrait;
+ 
 use App\Models\MobileVersion;
 use Modules\Reservation\Entities\Reservation;
 use Modules\Reservation\Resources\User\ReservationResource;
 
 class HomeController extends Controller
 {
-    use GeneralTrait;
+     
     /**
      * @var BannerResourceController
      */
@@ -48,7 +48,7 @@ class HomeController extends Controller
         $originalBanners=$banners->original;
         $mobileVersions=MobileVersion::get();
 
-        if(!authUser()){
+        if(!auth()->guard('api')->user()){
            $data = [
 
            ];

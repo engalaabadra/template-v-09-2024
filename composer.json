@@ -8,25 +8,24 @@
     "require": {
         "php": "^8.0.2",
         "barryvdh/laravel-dompdf": "^2.0",
-        "beyondcode/laravel-websockets": "^1.14",
         "doctrine/dbal": "^3.0",
+        "firebase/php-jwt": "*",
         "guzzlehttp/guzzle": "^7.2",
         "jenssegers/date": "^4.0",
-        "laravel/framework": "^10.0",
+        "laravel/framework": "^11.0",
         "laravel/helpers": "^1.6",
-        "laravel/passport": "^11.8",
-        "laravel/sanctum": "^3.2",
+        "laravel/passport": "^12.0",
+        "laravel/reverb": "^1.0",
+        "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.6",
-        "laravel/telescope": "^5.2",
+        "laravel/telescope": "^5.0",
         "laravel/tinker": "^2.7",
         "laravel/ui": "^4.4",
-        "mcamara/laravel-localization": "^1.8",
         "mpdf/mpdf": "^8.1.6",
         "nwidart/laravel-modules": "^8.3",
         "pusher/pusher-php-server": "^7.2",
-        "santigarcor/laratrust": "^7.2",
+        "santigarcor/laratrust": "^8.3",
         "spatie/laravel-ignition": "^2.0",
-        "spatie/laravel-permission": "^5.9",
         "torann/geoip": "^3.0",
         "twilio/sdk": "^7.7",
         "vonage/client": "^4.0"
@@ -36,7 +35,6 @@
         "laravel/pint": "^1.0",
         "laravel/sail": "^1.0.1",
         "mockery/mockery": "^1.4.4",
-        "nunomaduro/collision": "^7.0",
         "phpunit/phpunit": "^10.0"
     },
     "autoload": {
@@ -49,12 +47,10 @@
 
         },
         "files": [
-            "app/Helper/media.php",
             "app/Helper/response.php",
-            "app/Helper/auth.php",
             "app/Helper/App.php",
             "app/Helper/constants.php",
-            "app/Helper/methods.php"
+            "app/Helper/auth.php"
         ]
     },
     "autoload-dev": {

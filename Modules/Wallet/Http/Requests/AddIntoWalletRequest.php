@@ -3,13 +3,13 @@
 namespace Modules\Wallet\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use GeneralTrait;
+ 
 use Illuminate\Validation\Rule;
 
 
 class AddIntoWalletRequest extends FormRequest
 {
-    use GeneralTrait;
+     
 
     /**
      * Determine if the Wallet is authorized to make this request.

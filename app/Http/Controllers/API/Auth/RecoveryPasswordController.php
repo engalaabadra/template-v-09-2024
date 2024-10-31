@@ -6,19 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Models\PasswordReset;
 use App\Models\User;
-use App\Repositories\Auth\Recovery\Password\PasswordRepository;
 use App\Http\Requests\Auth\CheckCodeRequest;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
-use GeneralTrait;
+use App\Services\General\ProccessCodesService;
+use App\Repositories\Auth\Recovery\Password\PasswordRepository;
+use App\Services\Auth\Password\PasswordRecoveryService;
 
 class RecoveryPasswordController extends Controller
 {
-    use GeneralTrait;
-
-    /**
-     * @var PasswordRepository
-     */
-    protected $passwordRepo;
+     
     /**
      * @var User
      */
@@ -27,39 +23,53 @@ class RecoveryPasswordController extends Controller
      * @var PasswordReset
      */
     protected $passwordReset;
-    public function __construct(User $user,PasswordReset $passwordReset,PasswordRepository $passwordRepo){
+
+    /**
+     * @var PasswordRecoveryService
+     */
+    protected $passwordRecoveryService;
+    
+    public function __construct(User $user,PasswordReset $passwordReset, PasswordRepository $passwordRepo, PasswordRecoveryService $passwordRecoveryService){
         $this->user = $user;
-        $this->passwordRepo = $passwordRepo;
         $this->passwordReset = $passwordReset;
+        $this->passwordRepo = $passwordRepo;
+        $this->passwordRecoveryService = $passwordRecoveryService;
 
     }
+
     /** Forgot Password 
      * @param ForgotPasswordRequest $request
      * @return JsonResponse
      */
     public function forgotPassword(ForgotPasswordRequest $request){
         $result =  $this->passwordRepo->forgotPassword($request,$this->passwordReset);
-        $errorResponse = isDataMissing($result);
-        if ($errorResponse) return $errorResponse; // Return the error message if data is missing
+        if(is_string($result)) return clientError(0,$result);// Return the error message if data is missing
         return successResponse(0,$result);
     }
-    /** Check Code Recovery
-     * @param CheckCodeRequest $request
-     * @return JsonResponse
-     */
-    public function checkCodeRecovery(CheckCodeRequest $request){
-        $result= $this->passwordRepo->checkCode($request,$this->passwordReset);
-        $errorResponse = isDataMissing($result);
-        if ($errorResponse) return $errorResponse; // Return the error message if data is missing
-        return successResponse(0,$result);
+
+         /**
+    * Check Code .
+    * @param CheckCodeRequest $request
+    * @param User $model
+    * @return object
+    */
+    public function checkCode(checkCodeRequest $request){
+        $data= $request->validated();
+        $objectCode= app(ProccessCodesService::class)->checkCode($this->passwordReset,$data['code']);
+        if(is_string($objectCode)) return  $objectCode;
+        $infoUser = session('info_user');
+        $data = $this->passwordRecoveryService->prepareMessageData($this->passwordReset, $infoUser);
+        // app(SendingMessagesService::class)->sendingMessage($data);
+        return successResponse(0,$objectCode);
     }
-    /** Resend Code Recovery
-     * @return JsonResponse
-     */
-    public function resendCodeRecovery(){
-        $result= $this->passwordRepo->resendCode($this->passwordReset);
-        $errorResponse = isDataMissing($result);
-        if ($errorResponse) return $errorResponse; // Return the error message if data is missing
+
+    /** Resend Code
+    * @param PasswordReset $model
+    * @return object
+    */
+    public function resendCode(){
+        $result = $this->passwordRepo->resendCode($this->passwordReset);
+        if(is_string($result)) return clientError(0,$result);
         return successResponse(0,$result);
     }
 
@@ -68,9 +78,10 @@ class RecoveryPasswordController extends Controller
      * @return JsonResponse
      */
     public function resetPassword(ResetPasswordRequest $request){
-        $result=$this->passwordRepo->resetPassword($request);
-        $errorResponse = isDataMissing($result);
-        if ($errorResponse) return $errorResponse; // Return the error message if data is missing
+        $data = $request->validated();
+        // Fetch the user based on email or phone number
+        $result = $this->passwordRepo->resetPassword($request);
+        if (!$result)  return clientError(0,$result);
         return successResponse(0,$result);
     }
 

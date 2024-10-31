@@ -1,4 +1,4 @@
 <?php
-use Modules\Movement\Http\Controllers\API\User\MovementResourceController;
+use Modules\Movement\Http\Controllers\API\MovementController;
 
-Route::resource('movements', MovementResourceController::class)->only(['index']);
+Route::resource('movements', MovementController::class)->only(['index']);

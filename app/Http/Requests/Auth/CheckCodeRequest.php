@@ -45,32 +45,5 @@ class CheckCodeRequest extends FormRequest
 
         ];
     }
-    /**
-    * Prepare Message Data .
-    * @param RegisterCodeNum $model
-    * @param RegisterRequest $request
-    * @param string $code
-    * @return int OR string
-    */
-    public function prepareMessageData($model, $infoUser)
-    {
-        $commonData = [
-            'code' => $infoUser->code,
-        ];
-    
-        if ($model instanceof \App\Models\RegisterCodeNum) {
-            return array_merge($commonData, [
-                'data-user' => $infoUser->email ?? $infoUser->phone_no,
-                'type' => 'welcome',
-            ]);
-        } elseif ($model instanceof \App\Models\PasswordReset) {
-            return array_merge($commonData, [
-                'email' => $infoUser->email ?? null,
-                'phone_no' => $infoUser->phone_no ?? null,
-                'type' => 'check-code',
-            ]);
-        }
-        return $commonData;
-    }
 
 }

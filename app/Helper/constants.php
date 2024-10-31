@@ -1,77 +1,27 @@
 <?php
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
-use Illuminate\Support\Arr;
 use Carbon\Carbon;
 
- function dashboard(){
-   return 'admin.dashboard';
- }
- function home(){
-    return 'home';
- }
- function localLang(){
-   return config('app.locale');
- }
- function strRandom(){
-   return mt_rand(1000, 9999);
-}
-function strLength($data){
-   return Str::length($data);
-}
-function hashData($data){
-   return Hash::make($data);
-}
-function hashCheck($value1,$value2){
-   return Hash::check($value1, $value2);
-}
-function exceptData($data,$dataExcept){
-   return Arr::except($data ,$dataExcept);
-}
 
-function urlFlag($code){
-   return 'https://ipdata.co/flags/'.$code.'.png';
-}
 function systemCurrency(){
    return 'SAR';
-}
-function tapId(){
-   return request()->input('tap_id');
 }
 function isEagerLoading(){
    return request()->input('is_eager_loading');
 }
-function location(){
-   return geoip(request()->ip());
-}
 function countryCurrency(){
-   return  location()->currency;
+   return  geoip(request()->ip())->currency;
 }
-//for filters
 
+//for filters
 function lang(){
-   if(isset(getallheaders()['lang'])) return getallheaders()['lang']  ? getallheaders()['lang'] : localLang();
-   else return localLang();
-}
-function my(){
-   return request()->input('my');
+   if(isset(getallheaders()['lang'])) return getallheaders()['lang']  ? getallheaders()['lang'] : config('app.locale');
+   else return config('app.locale');
 }
 function page(){
    return request()->input('page');
 }
-
-function postId(){
-   return request()->input('post_id');
-}
 function clientId(){
    return request()->input('client_id');
-}
-function isAnonymous(){
-   return request()->input('is_anonymous');
-}
-
-function sessionId(){
-   return request()->input('session_id');
 }
 
 function status(){
@@ -131,8 +81,7 @@ function modelName($model){
 }
 
 function getModelClass($modelName){
-   $namespace = 'Modules\\'. ucfirst($modelName). '\\Entities\\';
-   $modelClass = $namespace . $modelName;
+   $modelClass = 'App\\Models\\'. ucfirst($modelName);
    //check if exist this model or not
    return class_exists($modelClass) ? $modelClass : null;
 }
@@ -147,19 +96,14 @@ function total(){
  */
 function getCode(): string
 {
-    return appProduction() ? strRandom() : '0000';
+    return env('APP_ENV') === 'production' ? mt_rand(1000, 9999) : '0000';
 }
 
-/**
- * Check if the application is in production environment.
- *
- * @return bool
- */
-function appProduction(): bool
-{
-    return env('APP_ENV') === 'production';
-}
 
 function filePath($url){
    return 'public/' . ltrim($url, '/storage/');
+}
+
+function urlFlag($code){
+   return 'https://ipdata.co/flags/'.$code.'.png';
 }

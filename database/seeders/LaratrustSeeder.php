@@ -36,7 +36,7 @@ class LaratrustSeeder extends Seeder
         foreach ($config as $key => $modules) {//$config->this is from file laratrust_seeder in config foler in role_structure -> this arr contains on all roles 
 
             // Create a new role
-            $role = Role::firstOrCreate([
+            $role = Role::create([
                 'name' => $key,//name is role 
                 'display_name' => ucwords(str_replace('_', ' ', $key)),//like super_admin will be in db : Super Admin
                 'description' => ucwords(str_replace('_', ' ', $key))
@@ -44,30 +44,36 @@ class LaratrustSeeder extends Seeder
             $permissions = [];//create_user,read_user,update_user,delete_user
 
             $this->command->info('Creating Role '. strtoupper($key));
-
             // Reading role permission modules
             foreach ($modules as $module => $value) {
 
-                foreach (explode(',', $value) as $p => $perm) {
+                foreach (explode(',', $value) as $perm) {
 
                     $permissionValue = $mapPermission->get($perm);
+                    $permissionName = $module . '_' . $permissionValue;
+                   // Check if permission already exists
+                    $existingPermission = Permission::where('name', $permissionName)->first();
 
-                    $permissions[] = Permission::firstOrCreate([
-                        'name' => $module . '_' . $permissionValue,//to became like this : create_user,read_user,update_user,delete_user
-                        'display_name' => ucfirst($permissionValue) . ' ' . ucfirst($module),
-                        'description' => ucfirst($permissionValue) . ' ' . ucfirst($module),
-                    ])->id;
+                    if (!$existingPermission) {
+                        $permissions[] = Permission::create([
+                            'name' => $permissionName,//to became like this : create_user,read_user,update_user,delete_user
+                            'display_name' => ucfirst($permissionValue) . ' ' . ucfirst($module),
+                            'description' => ucfirst($permissionValue) . ' ' . ucfirst($module),
+                        ])->id;
 
-                    $this->command->info('Creating Permission to '.$permissionValue.' for '. $module);
-                }
+                        $this->command->info('Creating Permission to '.$permissionValue.' for '. $module);
+                        }else{
+                            $permissions[] = $existingPermission->id;
+                            $this->command->info("Permission {$permissionName} already exists.");
+                        }
+                    }
             }
-
+            
             // Attach all permissions to the role **** to put these per:create_user,read_user,update_user,delete_user into this role like super_admin
             $role->permissions()->sync($permissions);
-
-        
-    }
-    
+            
+            
+        }
         if (Config::get('laratrust_seeder.create_users')) {
             $this->command->info("Creating '{superadmin}'");
             // Create default user for each role
@@ -78,7 +84,12 @@ class LaratrustSeeder extends Seeder
                 'password' => 'password',
             ]);
             $rolesuperadmin=Role::where(['name'=>'superadmin'])->first();
-            $superadmin->attachRole($rolesuperadmin);
+            if ($rolesuperadmin) {
+                $superadmin->assignRole($rolesuperadmin);
+            } else {
+                // Optionally log or handle the case where the role is not found
+            }
+            // if($superadmin) $superadmin->assignRole($rolesuperadmin);
 
             $this->command->info("Creating '{admin}'");
             // Create default user for each role
@@ -89,7 +100,7 @@ class LaratrustSeeder extends Seeder
                 'password' => 'password',
             ]);
             $roleadmin=Role::where(['name'=>'admin'])->first();
-            $admin->attachRole($roleadmin);
+            $admin->assignRole($roleadmin);
 
             //users
             $this->command->info("Creating '{alaa}'");
@@ -101,7 +112,7 @@ class LaratrustSeeder extends Seeder
                 'password' => 'password',
             ]);
             $roleuser1=Role::where(['name'=>'user'])->first();
-            $user1->attachRole($roleuser1);
+            $user1->assignRole($roleuser1);
 
 
             $this->command->info("Creating '{Mahmod}'");
@@ -113,7 +124,7 @@ class LaratrustSeeder extends Seeder
                 'password' => 'password',
             ]);
             $roleuser2=Role::where(['name'=>'user'])->first();
-            $user2->attachRole($roleuser2);
+            $user2->assignRole($roleuser2);
 
             $this->command->info("Creating '{ali}'");
             // Create default user for each role
@@ -124,7 +135,7 @@ class LaratrustSeeder extends Seeder
                 'password' => 'password',
             ]);
             $roleuser3=Role::where(['name'=>'user'])->first();
-            $user3->attachRole($roleuser3);
+            $user3->assignRole($roleuser3);
 
             $this->command->info("Creating '{ahmed}'");
             // Create default user for each role
@@ -135,7 +146,7 @@ class LaratrustSeeder extends Seeder
                 'password' => 'password',
             ]);
             $roleuser4=Role::where(['name'=>'user'])->first();
-            $user4->attachRole($roleuser4);
+            $user4->assignRole($roleuser4);
 
         }
   

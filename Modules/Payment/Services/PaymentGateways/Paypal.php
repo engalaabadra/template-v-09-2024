@@ -20,9 +20,10 @@ class Paypal implements PaymentGatewayFactory
     protected $paymentMethod;
     protected $options;
     protected $client;
-    public function __construct(PaymentMethod $paymentMethod , $options)
+    public function __construct(PaymentMethod $paymentMethod , PaymentService $paymentService , $options)
     {
         $this->paymentMethod = $paymentMethod;
+        $this->paymentService = $paymentService;
         $this->options = $options;
     }
 
@@ -53,7 +54,7 @@ class Paypal implements PaymentGatewayFactory
 
    public function verify() : Payment//when click on pay now
    {
-        $resultPayment = $this->getPayment();
+        $resultPayment = $this->paymentService->getPayment();
         $request = new OrdersCaptureRequest("APPROVED-ORDER-ID");
         $request->prefer('return=representation');
         try{

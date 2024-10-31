@@ -15,7 +15,7 @@ class LaratrustSetupTables extends Migration
         // Create table for storing roles
         Schema::create('roles', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('main_lang')->default(localLang());
+            $table->string('main_lang')->default(config('app.locale'));
             $table->foreignId('translate_id')->nullable()->constrained('roles')->cascadeOnUpdate()->cascadeOnDelete();
             $table->string('name')->unique();
             $table->string('display_name')->nullable();
@@ -28,7 +28,7 @@ class LaratrustSetupTables extends Migration
         // Create table for storing permissions
         Schema::create('permissions', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('main_lang')->default(localLang());
+            $table->string('main_lang')->default(config('app.locale'));
             $table->foreignId('translate_id')->nullable()->constrained('permissions')->cascadeOnUpdate()->cascadeOnDelete();
             $table->string('name')->unique();
             $table->string('display_name')->nullable();

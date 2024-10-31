@@ -4,18 +4,12 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Database\Seeders\LaratrustSeeder;
-use Modules\Geocode\Database\Seeders\GeocodeDatabaseSeeder;
-use Modules\Board\Database\Seeders\BoardDatabaseSeeder;
-use Modules\Banner\Database\Seeders\BannerDatabaseSeeder;
-use Modules\Comment\Database\Seeders\CommentDatabaseSeeder;
-use Modules\Hashtag\Database\Seeders\HashtagDatabaseSeeder;
-use Modules\Hashtag\Entities\Hashtag;
-use Modules\Like\Database\Seeders\LikeDatabaseSeeder;
-use Modules\Review\Database\Seeders\ReviewDatabaseSeeder;
+use Database\Seeders\Geocode\GeocodeDatabaseSeeder;
+use Database\Seeders\BoardDatabaseSeeder;
+use Database\Seeders\BannerDatabaseSeeder;
+use Database\Seeders\ReviewDatabaseSeeder;
 use Modules\Payment\Database\Seeders\PaymentDatabaseSeeder;
-use Modules\Post\Database\Seeders\PostDatabaseSeeder;
-use Modules\Profile\Database\Seeders\ProfileDatabaseSeeder;
-use Modules\Reshare\Database\Seeders\ReshareDatabaseSeeder;
+use Database\Seeders\ProfileDatabaseSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,7 +18,7 @@ class DatabaseSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         $this->call(GeocodeDatabaseSeeder::class);
         $this->call(LaratrustSeeder::class);

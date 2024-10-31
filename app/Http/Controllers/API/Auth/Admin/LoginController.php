@@ -11,18 +11,18 @@ use Modules\Profile\Resources\AdminResource;
 class LoginController extends Controller
 {
     /**
-     * @var LoginRepository
-     */
-    protected $loginRepo;
-    /**
      * @var User
     */
     protected $user;
+    /**
+     * @var LoginRepository
+    */
+    protected $loginRepo;
 
-    public function __construct(LoginRepository $loginRepo,User $user){
-        $this->loginRepo = $loginRepo;
+    public function __construct(User $user , LoginRepository $loginRepo){
         $this->user = $user;
-    }
+        $this->loginRepo = $loginRepo;
+    }  
 
     /**
      * Handle an incoming authentication request.
@@ -31,11 +31,12 @@ class LoginController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      */
     public function login(LoginRequest $request){
-        $result=  $this->loginRepo->login($request,$this->user);
-        $errorResponse = isDataMissing($result);
-        if ($errorResponse) return $errorResponse; // Return the error message if data is missing
+         $user = $this->loginRepo->checkLogin($request);
+        if(is_string($user)) return clientError(0,$user);// Return the error message if data is missing
+        $roles= $user->roles->pluck('name')->toArray();
+        if(!in_array('admin',$roles)) return trans('messages.Invalid credentials');
         $data=[
-            "token"=>createToken($result),
+            "token"=>$user->createToken('token')->accessToken,
             // "admin" => new AdminResource($result),
         ];
         return successResponse(0, $data,trans('auth.Logged in successfully'));
@@ -49,10 +50,9 @@ class LoginController extends Controller
      */
    public function destroy(Request $request)
     {
-        $result=  $this->loginRepo->logout($request);
-        $errorResponse = isDataMissing($result);
-        if ($errorResponse) return $errorResponse; // Return the error message if data is missing
-        $result ? successResponse(4) : serverError(0);
+        if(!hasRole('admin')) return clientError(0,trans('messages.Invalid credentials'));// Return the error message if data is missing
+        $request->user()->token()->revoke();
+        return successResponse(4);
     }
 }
 

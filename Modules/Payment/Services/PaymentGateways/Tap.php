@@ -16,9 +16,10 @@ class Tap implements PaymentGatewayFactory
     protected string $tapBaseUrl = 'https://api.tap.company/v2';
     protected string $tapAuthSecret;
 
-    public function __construct(PaymentMethod $paymentMethod , $options)
+    public function __construct(PaymentMethod $paymentMethod , PaymentService $paymentService  , $options)
     {
         $this->paymentMethod = $paymentMethod;
+        $this->paymentService = $paymentService;
         $this->tapAuthSecret = config('services.tap.secret_test');
     }
 
@@ -41,7 +42,7 @@ class Tap implements PaymentGatewayFactory
         return $response->transaction->url;
     }
     public function verify() : Payment{//when click on pay now
-        $resultPayment = $this->getPayment();
+        $resultPayment = $this->paymentService->getPayment();
         try{
             $response = $this->checkDataPaymentCallback();
             if (isset($response->errors)) return response()->json($response->errors);

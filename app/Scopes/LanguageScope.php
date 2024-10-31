@@ -9,26 +9,16 @@ use Illuminate\Database\Eloquent\Scope;
 
 class LanguageScope implements Scope
 {
-
     /**
-
      * Apply the scope to a given Eloquent query builder.
-
-     *
-
      * @param  \Illuminate\Database\Eloquent\Builder  $builder
-
      * @param  \Illuminate\Database\Eloquent\Model  $model
-
      * @return void
-
      */
 
     public function apply(Builder $builder, Model $model)
-
     {
-        $builder->where('main_lang',localLang());
-
+        $builder->where('main_lang',config('app.locale'));
     }
 
 }
